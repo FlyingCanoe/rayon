@@ -225,6 +225,12 @@ fn enumerate() {
 }
 
 #[test]
+fn step_by() {
+    let v: Vec<_> = (0..10).step_by(3).collect();
+    check(&v, || (0..10).into_par_iter().step_by(3))
+}
+
+#[test]
 fn inspect() {
     let v: Vec<_> = (0..10).collect();
     check(&v, || (0..10).into_par_iter().inspect(|_| ()));
