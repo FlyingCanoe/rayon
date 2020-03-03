@@ -226,6 +226,12 @@ fn enumerate() {
 
 #[test]
 fn step_by() {
+    let v: Vec<_> = (0..10).step_by(2).collect();
+    check(&v, || (0..10).into_par_iter().step_by(2))
+}
+
+#[test]
+fn step_by_unaligned() {
     let v: Vec<_> = (0..10).step_by(3).collect();
     check(&v, || (0..10).into_par_iter().step_by(3))
 }
