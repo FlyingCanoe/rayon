@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use super::plumbing::*;
 use super::*;
 use crate::math::div_round_up;
@@ -19,8 +21,8 @@ pub struct StepBy<I: IndexedParallelIterator> {
 
 #[cfg(step_by)]
 impl<I> StepBy<I>
-    where
-        I: IndexedParallelIterator,
+where
+    I: IndexedParallelIterator,
 {
     /// Create a new `StepBy` iterator.
     pub(super) fn new(base: I, step: usize) -> Self {
@@ -30,14 +32,15 @@ impl<I> StepBy<I>
 
 #[cfg(step_by)]
 impl<I> ParallelIterator for StepBy<I>
-    where
-        I: IndexedParallelIterator,
+where
+    I: IndexedParallelIterator,
 {
     type Item = I::Item;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
-        where
-            C: UnindexedConsumer<Self::Item>, {
+    where
+        C: UnindexedConsumer<Self::Item>,
+    {
         bridge(self, consumer)
     }
 
@@ -48,8 +51,8 @@ impl<I> ParallelIterator for StepBy<I>
 
 #[cfg(step_by)]
 impl<I> IndexedParallelIterator for StepBy<I>
-    where
-        I: IndexedParallelIterator,
+where
+    I: IndexedParallelIterator,
 {
     fn drive<C: Consumer<Self::Item>>(self, consumer: C) -> C::Result {
         bridge(self, consumer)
@@ -60,26 +63,36 @@ impl<I> IndexedParallelIterator for StepBy<I>
     }
 
     fn with_producer<CB>(self, callback: CB) -> CB::Output
-        where
-            CB: ProducerCallback<Self::Item>,
+    where
+        CB: ProducerCallback<Self::Item>,
     {
-        return self.base.with_producer(Callback {callback, step: self.step});
+        let len = self.base.len();
+        return self.base.with_producer(Callback {
+            callback,
+            step: self.step,
+            len,
+        });
 
         struct Callback<CB> {
             callback: CB,
             step: usize,
+            len: usize,
         }
 
         impl<T, CB> ProducerCallback<T> for Callback<CB>
-            where
-                CB: ProducerCallback<T>,
+        where
+            CB: ProducerCallback<T>,
         {
             type Output = CB::Output;
             fn callback<P>(self, base: P) -> CB::Output
-                where
-                    P: Producer<Item = T>,
+            where
+                P: Producer<Item = T>,
             {
-                let producer = StepByProducer { base, step: self.step };
+                let producer = StepByProducer {
+                    base,
+                    step: self.step,
+                    len: self.len,
+                };
                 self.callback.callback(producer)
             }
         }
@@ -93,12 +106,13 @@ impl<I> IndexedParallelIterator for StepBy<I>
 struct StepByProducer<P> {
     base: P,
     step: usize,
+    len: usize,
 }
 
 #[cfg(step_by)]
 impl<P> Producer for StepByProducer<P>
-    where
-        P: Producer,
+where
+    P: Producer,
 {
     type Item = P::Item;
     type IntoIter = iter::StepBy<P::IntoIter>;
@@ -108,15 +122,19 @@ impl<P> Producer for StepByProducer<P>
     }
 
     fn split_at(self, index: usize) -> (Self, Self) {
-        let (left, right) = self.base.split_at(index * self.step);
+        let elem_index = min(index * self.step, self.len);
+
+        let (left, right) = self.base.split_at(elem_index);
         (
             StepByProducer {
                 base: left,
                 step: self.step,
+                len: elem_index,
             },
             StepByProducer {
                 base: right,
                 step: self.step,
+                len: self.len - elem_index,
             },
         )
     }
@@ -125,7 +143,7 @@ impl<P> Producer for StepByProducer<P>
         div_round_up(self.base.min_len(), self.step)
     }
 
-    fn max_len(&self) ->usize {
+    fn max_len(&self) -> usize {
         self.base.max_len() / self.step
     }
 }
