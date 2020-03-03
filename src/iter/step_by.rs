@@ -1,5 +1,7 @@
 use std::cmp::min;
 
+#![cfg(step_by)]
+
 use super::plumbing::*;
 use super::*;
 use crate::math::div_round_up;
