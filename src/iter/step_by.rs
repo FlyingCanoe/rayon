@@ -1,6 +1,5 @@
-use std::cmp::min;
-
 #![cfg(step_by)]
+use std::cmp::min;
 
 use super::plumbing::*;
 use super::*;
@@ -13,7 +12,6 @@ use std::usize;
 ///
 /// [`step_by()`]: trait.IndexedParallelIterator.html#method.step_by
 /// [`IndexedParallelIterator`]: trait.IndexedParallelIterator.html
-#[cfg(step_by)]
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 #[derive(Debug, Clone)]
 pub struct StepBy<I: IndexedParallelIterator> {
@@ -21,7 +19,6 @@ pub struct StepBy<I: IndexedParallelIterator> {
     step: usize,
 }
 
-#[cfg(step_by)]
 impl<I> StepBy<I>
 where
     I: IndexedParallelIterator,
@@ -32,7 +29,6 @@ where
     }
 }
 
-#[cfg(step_by)]
 impl<I> ParallelIterator for StepBy<I>
 where
     I: IndexedParallelIterator,
@@ -51,7 +47,6 @@ where
     }
 }
 
-#[cfg(step_by)]
 impl<I> IndexedParallelIterator for StepBy<I>
 where
     I: IndexedParallelIterator,
@@ -104,14 +99,12 @@ where
 /// ////////////////////////////////////////////////////////////////////////
 /// Producer implementation
 
-#[cfg(step_by)]
 struct StepByProducer<P> {
     base: P,
     step: usize,
     len: usize,
 }
 
-#[cfg(step_by)]
 impl<P> Producer for StepByProducer<P>
 where
     P: Producer,
