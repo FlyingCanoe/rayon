@@ -2429,7 +2429,7 @@ pub trait IndexedParallelIterator: ParallelIterator {
         Enumerate::new(self)
     }
 
-    /// Creates a iterator that step by the given amount
+    /// Creates an iterator that steps by the given amount
     ///
     /// # Examples
     ///
