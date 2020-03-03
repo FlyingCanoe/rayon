@@ -2429,7 +2429,7 @@ pub trait IndexedParallelIterator: ParallelIterator {
         Enumerate::new(self)
     }
 
-    /// Creates a iterator that step by the given amount
+    /// Creates an iterator that steps by the given amount
     ///
     /// # Examples
     ///
@@ -2444,8 +2444,10 @@ pub trait IndexedParallelIterator: ParallelIterator {
     ///
     /// assert_eq!(result, [3, 6, 9])
     /// ```
+    ///
     /// # Compatibility
-    /// this only work on rust 1.38 or superior
+    ///
+    /// This method is only available on Rust 1.38 or greater.
     #[cfg(step_by)]
     fn step_by(self, step: usize) -> StepBy<Self> {
         StepBy::new(self, step)

@@ -1,12 +1,14 @@
 use std::cmp::min;
 
+#![cfg(step_by)]
+
 use super::plumbing::*;
 use super::*;
 use crate::math::div_round_up;
 use std::iter;
 use std::usize;
 
-/// `StepBy` is an iterator that skip `n` element between each yield. where `n` is the given step
+/// `StepBy` is an iterator that skips `n` elements between each yield, where `n` is the given step.
 /// This struct is created by the [`step_by()`] method on [`IndexedParallelIterator`]
 ///
 /// [`step_by()`]: trait.IndexedParallelIterator.html#method.step_by
